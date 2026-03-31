@@ -1,0 +1,6 @@
+<Solution>
+  <Project Path="TravelNow.Application/TravelNow.Application.csproj" />
+  <Project Path="TravelNow.Domain/TravelNow.Domain.csproj" />
+  <Project Path="TravelNow.Infrastructure/TravelNow.Infrastructure.csproj" />
+  <Project Path="TravelNow/TravelNow.csproj" />
+</Solution>
