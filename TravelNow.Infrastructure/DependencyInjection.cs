@@ -1,11 +1,43 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using TravelNow.Application.Interfaces.UnitOfWorks;
+using TravelNow.Domain.Entities.Identity;
+using TravelNow.Infrastructure.UnitOfWorks;
 
 namespace TravelNow.Infrastructure;
 
-public class DependencyInjection
+public static class DependencyInjection
 {
-    public static IServiceCollection AddInfrastructureDI(IServiceCollection services)
+    public static IServiceCollection AddInfrastructureDI(this IServiceCollection services, IConfiguration configuration)
     {
+        // Database
+        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        services.AddDbContext<TravelNowDbContext>(options =>
+            options.UseNpgsql(connectionString));
+
+        // Identity
+        services.AddIdentity<User, Role>(options =>
+        {
+            options.Password.RequireDigit = true;
+            options.Password.RequireLowercase = true;
+            options.Password.RequireUppercase = true;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Password.RequiredLength = 6;
+
+            options.User.RequireUniqueEmail = true;
+
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(5);
+            options.Lockout.MaxFailedAccessAttempts = 5;
+        })
+        .AddEntityFrameworkStores<TravelNowDbContext>();
+
+        // UnitOfWork
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+        // HttpContextAccessor
+        services.AddHttpContextAccessor();
+
         return services;
     }
 }
