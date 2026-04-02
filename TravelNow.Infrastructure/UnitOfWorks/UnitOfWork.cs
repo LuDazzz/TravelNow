@@ -1,7 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
-using Microsoft.Extensions.Configuration;
 using TravelNow.Application.Interfaces.Repositories;
 using TravelNow.Application.Interfaces.UnitOfWorks;
 using TravelNow.Domain.Entities.Base;
@@ -22,6 +21,7 @@ public class UnitOfWork : IUnitOfWork
         )
     {
         _context = context ?? throw new ArgumentNullException(nameof(context));
+        _httpContextAccessor = httpContextAccessor;
         _repositories = new Dictionary<Type, object>();
         DbContext = _context;
     }

@@ -1,11 +1,14 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace TravelNow.Application;
 
-public class DependencyInjection
+public static class DependencyInjection
 {
-    public static IServiceCollection AddApplicationDI(IServiceCollection services)
+    public static IServiceCollection AddApplicationDI(this IServiceCollection services)
     {
+        // Register application services here
+        // e.g. services.AddScoped<IUserService, UserService>();
+
         return services;
     }
 }

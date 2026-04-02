@@ -1,19 +1,19 @@
-﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TravelNow.Domain.Entities.Base;
 
-public abstract class BaseEntity : IAuditEntity
+public abstract class BaseEntity : IAuditEntity, IIsDeletedEntity
 {
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public Guid Id { get; set; } = default!;
+    public Guid Id { get; set; }
 
-    public DateTimeOffset CreateAt { get; set; } = DateTimeOffset.UtcNow;
+    public DateTimeOffset CreatedAt { get; set; } = DateTimeOffset.UtcNow;
 
-    public Guid CreateBy { get; set; }
+    public Guid CreatedBy { get; set; }
 
-    public DateTimeOffset? UpdateAt { get; set; }
+    public DateTimeOffset? UpdatedAt { get; set; }
 
-    public Guid? UpdateBy { get; set; }
+    public Guid? UpdatedBy { get; set; }
 }
