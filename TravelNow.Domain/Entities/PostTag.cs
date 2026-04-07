@@ -1,12 +1,19 @@
 using System.ComponentModel.DataAnnotations.Schema;
-using Microsoft.AspNetCore.Identity;
 using TravelNow.Domain.Entities.Base;
 
-namespace TravelNow.Domain.Entities.Identity;
+namespace TravelNow.Domain.Entities;
 
-[Table("UserRoles")]
-public class UserRole : IdentityUserRole<Guid>, IAuditEntity
+[Table("PostTags")]
+public class PostTag : IAuditEntity
 {
+    public Guid PostId { get; set; }
+
+    public virtual Post Post { get; set; }
+
+    public Guid TagId { get; set; }
+
+    public virtual Tag Tag { get; set; }
+
     public DateTimeOffset CreatedAt { get; set; }
 
     public Guid CreatedBy { get; set; }
@@ -14,8 +21,4 @@ public class UserRole : IdentityUserRole<Guid>, IAuditEntity
     public DateTimeOffset? UpdatedAt { get; set; }
 
     public Guid? UpdatedBy { get; set; }
-
-    public virtual User User { get; set; } = null!;
-
-    public virtual Role Role { get; set; } = null!;
 }

@@ -16,4 +16,6 @@ public abstract class BaseEntity : IAuditEntity, IIsDeletedEntity
     public DateTimeOffset? UpdatedAt { get; set; }
 
     public Guid? UpdatedBy { get; set; }
+
+    public bool IsDeleted { get; set; }
 }

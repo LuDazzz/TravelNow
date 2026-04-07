@@ -1,6 +1,10 @@
 <Solution>
+  <Folder Name="/Config/">
+    <File Path="TravelNow/docker-compose.yml" />
+  </Folder>
   <Project Path="TravelNow.Application/TravelNow.Application.csproj" />
   <Project Path="TravelNow.Domain/TravelNow.Domain.csproj" />
   <Project Path="TravelNow.Infrastructure/TravelNow.Infrastructure.csproj" />
+  <Project Path="TravelNow.Shared/TravelNow.Shared.csproj" Id="fa0c5a79-2258-4fb1-ae32-1367e67693df" />
   <Project Path="TravelNow/TravelNow.csproj" />
 </Solution>

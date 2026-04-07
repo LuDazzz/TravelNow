@@ -11,7 +11,6 @@ public class Role : IdentityRole<Guid>, IAuditEntity
     [MaxLength(500)]
     public string? Description { get; set; }
 
-    // IAuditEntity
     public DateTimeOffset CreatedAt { get; set; }
 
     public Guid CreatedBy { get; set; }
@@ -20,7 +19,6 @@ public class Role : IdentityRole<Guid>, IAuditEntity
 
     public Guid? UpdatedBy { get; set; }
 
-    // Navigation properties
     public virtual ICollection<UserRole> UserRoles { get; set; } = [];
 
     public virtual ICollection<RoleClaim> RoleClaims { get; set; } = [];

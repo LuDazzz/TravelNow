@@ -1,0 +1,45 @@
+services:
+  travelnow-api:
+    build:
+      context: .
+      dockerfile: TravelNow/Dockerfile
+    container_name: travelnow-api
+    ports:
+      - "8080:8080"
+      - "8081:8081"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=travelnow-db;Port=5432;Database=TravelNowDb;Username=postgres;Password=dung2309
+    depends_on:
+      travelnow-db:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - travelnow-network
+
+  travelnow-db:
+    image: postgres:17-alpine
+    container_name: travelnow-db
+    ports:
+      - "5433:5432"
+    environment:
+      - POSTGRES_DB=TravelNowDb
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=dung2309
+    volumes:
+      - travelnow-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d TravelNowDb"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - travelnow-network
+
+volumes:
+  travelnow-pgdata:
+
+networks:
+  travelnow-network:
+    driver: bridge
