@@ -1,9 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 
-namespace TravelNow.Domain.Helper;
+namespace TravelNow.Shared.Helper;
 
 public static class JsonHelper
 {

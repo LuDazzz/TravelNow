@@ -1,8 +1,7 @@
 ﻿using System.Globalization;
-using System.Runtime.Serialization;
 using TravelNow.Domain.Constants;
 
-namespace TravelNow.Domain.Helper;
+namespace TravelNow.Shared.Helper;
 
 public static class DateTimeHelper
 {

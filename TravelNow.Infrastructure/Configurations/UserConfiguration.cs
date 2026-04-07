@@ -12,6 +12,7 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
 
         builder.HasKey(u => u.Id);
 
+        // Property configurations
         builder.Property(u => u.FirstName).HasMaxLength(100);
         builder.Property(u => u.LastName).HasMaxLength(100);
         builder.Property(u => u.AvatarUrl).HasMaxLength(500);
@@ -21,12 +22,25 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.UserName).HasMaxLength(256);
         builder.Property(u => u.PhoneNumber).HasMaxLength(20);
 
+        // Relationships
         builder.HasMany(u => u.UserRoles)
             .WithOne(ur => ur.User)
             .HasForeignKey(ur => ur.UserId)
             .IsRequired();
 
-        builder.HasIndex(u => u.Email).IsUnique();
-        builder.HasIndex(u => u.IsDeleted);
+        builder.HasMany(u => u.UserTokens)
+            .WithOne(ut => ut.User)
+            .HasForeignKey(ut => ut.UserId)
+            .IsRequired();
+
+        builder.HasMany(u => u.Posts)
+            .WithOne(p => p.User)
+            .HasForeignKey(p => p.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasMany(u => u.Comments)
+            .WithOne(c => c.User)
+            .HasForeignKey(c => c.UserId)
+            .OnDelete(DeleteBehavior.Restrict);
     }
 }

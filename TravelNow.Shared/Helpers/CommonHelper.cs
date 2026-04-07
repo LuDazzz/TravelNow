@@ -4,7 +4,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace TravelNow.Domain.Helper;
+namespace TravelNow.Shared.Helper;
 
 public static class CommonHelper
 {

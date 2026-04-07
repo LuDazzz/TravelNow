@@ -35,6 +35,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\TravelNow.Application\TravelNow.Application.csproj" />
+    <ProjectReference Include="..\TravelNow.Shared\TravelNow.Shared.csproj" />
   </ItemGroup>
 
 </Project>

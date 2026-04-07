@@ -4,8 +4,8 @@ using Microsoft.EntityFrameworkCore.ChangeTracking;
 using TravelNow.Application.Interfaces.Repositories;
 using TravelNow.Application.Interfaces.UnitOfWorks;
 using TravelNow.Domain.Entities.Base;
-using TravelNow.Domain.Helper;
 using TravelNow.Infrastructure.Repositories;
+using TravelNow.Shared.Helper;
 
 namespace TravelNow.Infrastructure.UnitOfWorks;
 
