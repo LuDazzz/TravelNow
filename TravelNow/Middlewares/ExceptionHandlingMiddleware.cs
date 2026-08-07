@@ -1,49 +1,80 @@
-﻿using System.Security;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using TravelNow.Application.Dtos.Base;
+using System.Security;
+using Microsoft.AspNetCore.Mvc;
 using TravelNow.Domain.Exceptions;
 
 namespace TravelNow.Middlewares;
 
-public class ExceptionHandlingMiddleware(RequestDelegate next, ILogger<ExceptionHandlingMiddleware> logger)
+public sealed class ExceptionHandlingMiddleware(
+    RequestDelegate next,
+    ILogger<ExceptionHandlingMiddleware> logger)
 {
-    public async Task Invoke(HttpContext context)
+    public async Task InvokeAsync(HttpContext context)
     {
         try
         {
             await next(context);
         }
-        catch (Exception ex)
+        catch (Exception exception)
         {
-            await HandleException(context, ex);
+            await HandleExceptionAsync(context, exception);
         }
     }
 
-    private Task HandleException(HttpContext context, Exception ex)
+    private async Task HandleExceptionAsync(HttpContext context, Exception exception)
     {
-        logger.LogError(ex, "");
-
-        var code = StatusCodes.Status500InternalServerError;
-        var errors = new List<string> { ex.Message };
-
-        code = ex switch
+        var statusCode = exception switch
         {
             NotFoundException => StatusCodes.Status404NotFound,
             BadRequestException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             SecurityException => StatusCodes.Status403Forbidden,
-            _ => code
+            _ => StatusCodes.Status500InternalServerError
         };
 
-        var result = JsonConvert.SerializeObject(ApiResponse<string>.Failure(errors), new JsonSerializerSettings()
+        if (statusCode >= StatusCodes.Status500InternalServerError)
         {
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        });
+            logger.LogError(
+                exception,
+                "Unhandled exception while processing request {TraceId}",
+                context.TraceIdentifier);
+        }
+        else
+        {
+            logger.LogWarning(
+                "Request failed with status code {StatusCode} for trace {TraceId}",
+                statusCode,
+                context.TraceIdentifier);
+        }
 
-        context.Response.ContentType = "application/json";
-        context.Response.StatusCode = code;
+        var problem = new ProblemDetails
+        {
+            Status = statusCode,
+            Title = GetTitle(statusCode),
+            Detail = GetDetail(statusCode),
+            Instance = context.Request.Path
+        };
+        problem.Extensions["traceId"] = context.TraceIdentifier;
 
-        return context.Response.WriteAsync(result);
+        context.Response.StatusCode = statusCode;
+        context.Response.ContentType = "application/problem+json";
+        await context.Response.WriteAsJsonAsync(problem, context.RequestAborted);
     }
+
+    private static string GetTitle(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "Bad request",
+        StatusCodes.Status401Unauthorized => "Authentication required",
+        StatusCodes.Status403Forbidden => "Forbidden",
+        StatusCodes.Status404NotFound => "Resource not found",
+        _ => "Unexpected error"
+    };
+
+    private static string GetDetail(int statusCode) => statusCode switch
+    {
+        StatusCodes.Status400BadRequest => "The request could not be processed.",
+        StatusCodes.Status401Unauthorized => "Authentication is required to access this resource.",
+        StatusCodes.Status403Forbidden => "You do not have permission to access this resource.",
+        StatusCodes.Status404NotFound => "The requested resource was not found.",
+        _ => "An unexpected error occurred."
+    };
 }
