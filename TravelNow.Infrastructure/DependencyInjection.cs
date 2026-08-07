@@ -1,8 +1,10 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using TravelNow.Application.Abstractions.Persistence.Places;
 using TravelNow.Application.Interfaces.UnitOfWorks;
 using TravelNow.Domain.Entities.Identity;
+using TravelNow.Infrastructure.Features.Places;
 using TravelNow.Infrastructure.UnitOfWorks;
 
 namespace TravelNow.Infrastructure;
@@ -34,6 +36,7 @@ public static class DependencyInjection
 
         // UnitOfWork
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<IPlaceReadPort, PlaceReadPort>();
 
         // HttpContextAccessor
         services.AddHttpContextAccessor();
