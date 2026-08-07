@@ -4,8 +4,8 @@
 FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS base
 USER $APP_UID
 WORKDIR /app
+ENV ASPNETCORE_HTTP_PORTS=8080
 EXPOSE 8080
-EXPOSE 8081
 
 # ---------- build ----------
 FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
