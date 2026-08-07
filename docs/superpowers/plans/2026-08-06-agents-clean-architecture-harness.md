@@ -48,7 +48,7 @@ Run:
 dotnet build TravelNow.slnx --no-restore --nologo
 ```
 
-Expected: exit code 0. The existing baseline may report the documented nullable and package vulnerability warnings. Record the exact warning count; do not treat existing warnings as introduced by the documentation change.
+Expected: exit code 0. The observed `--no-restore` baseline is 17 warnings: 16 nullable initialization warnings and one package vulnerability warning. Do not treat existing warnings as introduced by the documentation change.
 
 - [x] **Step 3: Confirm no root instruction file exists**
 
@@ -77,7 +77,7 @@ Expected: one commit containing only the implementation plan.
 - Create: `AGENTS.md`
 - Reference: `docs/superpowers/specs/2026-08-06-agents-clean-architecture-harness-design.md`
 
-- [ ] **Step 1: Create the document header and instruction semantics**
+- [x] **Step 1: Create the document header and instruction semantics**
 
 Add these top-level sections in this order:
 
@@ -92,7 +92,7 @@ Add these top-level sections in this order:
 
 The content must state that the file applies to the entire repository, narrower instructions may add constraints but cannot weaken root rules, repository evidence overrides assumptions, existing code is not precedent when it violates the target architecture, and agents must preserve user-owned working-tree changes.
 
-- [ ] **Step 2: Add the target architecture contract**
+- [x] **Step 2: Add the target architecture contract**
 
 Add these sections:
 
@@ -110,7 +110,7 @@ Add these sections:
 
 Include the exact project ownership and permitted dependency direction from the approved spec. Explicitly prohibit EF Core, ASP.NET Core, Identity, Npgsql, serialization, logging, `DbContext`, `DbSet`, `IQueryable`, `HttpContext`, SQL, and infrastructure models from the inner layers where applicable. State that API controllers perform transport mapping and invoke one use case, while Infrastructure implements Application-owned ports.
 
-- [ ] **Step 3: Add strict legacy remediation rules**
+- [x] **Step 3: Add strict legacy remediation rules**
 
 Add:
 
@@ -122,7 +122,7 @@ Add:
 
 List each observed violation from the spec. Require new code to comply, directly touched violations to be removed, tests and consumers needed for remediation to remain in the same task, and material scope expansion to be raised rather than hidden. Prohibit suppressions, null-forgiving workarounds, copied anti-patterns, and false repository-wide clean claims.
 
-- [ ] **Step 4: Add the complete harness lifecycle**
+- [x] **Step 4: Add the complete harness lifecycle**
 
 Add:
 
@@ -143,7 +143,7 @@ Add:
 
 For every stage, include concrete required actions and exit evidence. Require test-first work for behavior changes and bug fixes, with explicit exemptions for documentation-only, formatting-only, and metadata-only tasks. Require agents to stop before ambiguous breaking contracts, security weakening, destructive data operations, or materially different behavior.
 
-- [ ] **Step 5: Add engineering rules by concern**
+- [x] **Step 5: Add engineering rules by concern**
 
 Add:
 
@@ -160,7 +160,7 @@ Add:
 
 Cover nullable correctness, async naming, cancellation propagation, UTC time, ownership-based naming, minimal abstractions, options validation, application-owned ports, transaction boundaries, query projection, `AsNoTracking`, pagination, N+1 avoidance, explicit EF mapping, migration generation/review, API compatibility, sanitized failures, authorization and ownership checks, secrets/PII, structured logging, timeouts, retries, and idempotency.
 
-- [ ] **Step 6: Add test strategy and quality gates**
+- [x] **Step 6: Add test strategy and quality gates**
 
 Add:
 
@@ -187,7 +187,7 @@ dotnet test TravelNow.slnx --no-build
 
 State that agents first run narrow commands and then the full gate. Require architecture, migration, and package vulnerability checks when relevant. No new warnings are allowed; directly modified projects and directly touched warnings must become clean; unrelated baseline warnings must be disclosed until the repository reaches global warnings-as-errors.
 
-- [ ] **Step 7: Add change hygiene and completion evidence**
+- [x] **Step 7: Add change hygiene and completion evidence**
 
 Add:
 
@@ -206,7 +206,7 @@ Require working-tree inspection, preservation of user changes, scoped diffs, no 
 - Validate: `AGENTS.md`
 - Validate: `docs/superpowers/specs/2026-08-06-agents-clean-architecture-harness-design.md`
 
-- [ ] **Step 1: Check required section coverage**
+- [x] **Step 1: Check required section coverage**
 
 Run:
 
@@ -225,18 +225,20 @@ if ($missing) { throw "Missing AGENTS.md sections: $($missing -join ', ')" }
 
 Expected: exit code 0 with no output.
 
-- [ ] **Step 2: Scan for incomplete language and formatting errors**
+- [x] **Step 2: Scan for incomplete language and formatting errors**
 
 Run:
 
 ```powershell
 Select-String -Path AGENTS.md -Pattern 'TBD|TODO|FIXME|PLACEHOLDER|implement later' -CaseSensitive:$false
 git diff --check
+git diff --cached --check
+git diff HEAD --check
 ```
 
 Expected: no placeholder matches and no whitespace errors.
 
-- [ ] **Step 3: Verify standard command syntax against the current repository**
+- [x] **Step 3: Verify standard command syntax against the current repository**
 
 Run:
 
@@ -248,32 +250,41 @@ dotnet test TravelNow.slnx --no-build --nologo
 
 Expected: each command is accepted by the installed SDK. Record current formatting, warning, and test-inventory results honestly; documentation changes must not be reported as repairing baseline production issues.
 
-- [ ] **Step 4: Review the full diff against the spec**
+- [x] **Step 4: Review the full diff against the spec**
 
 Run:
 
 ```powershell
-git diff -- AGENTS.md
+git add AGENTS.md
+git diff --cached --check
+git diff --cached -- AGENTS.md
+git diff HEAD --check
+git diff HEAD --name-status
+git diff HEAD -- AGENTS.md docs/superpowers/plans/2026-08-06-agents-clean-architecture-harness.md docs/superpowers/specs/2026-08-06-agents-clean-architecture-harness-design.md
 git status --short
 ```
 
-Expected: `AGENTS.md` is the only uncommitted implementation file, and every acceptance criterion in the approved spec maps to a concrete rule.
+Expected: `AGENTS.md` is staged for exact review; plan progress and any evidence-backed spec correction remain unstaged for a separate documentation-record commit; every acceptance criterion in the approved spec maps to a concrete rule.
 
 ### Task 4: Commit and Publish the Documentation Change
 
 **Files:**
 - Commit: `AGENTS.md`
+- Update: `docs/superpowers/plans/2026-08-06-agents-clean-architecture-harness.md`
+- Update: `docs/superpowers/specs/2026-08-06-agents-clean-architecture-harness-design.md`
 
-- [ ] **Step 1: Commit the root guide intentionally**
+- [ ] **Step 1: Commit the root guide and verification records intentionally**
 
 Run:
 
 ```powershell
 git add AGENTS.md
 git commit -m "docs: add clean architecture agent guide"
+git add docs/superpowers/plans/2026-08-06-agents-clean-architecture-harness.md docs/superpowers/specs/2026-08-06-agents-clean-architecture-harness-design.md
+git commit -m "docs: record agent harness verification"
 ```
 
-Expected: a focused commit containing only `AGENTS.md`.
+Expected: one focused commit containing only `AGENTS.md`, followed by one commit containing only plan progress and the evidence-backed baseline/design corrections discovered during implementation.
 
 - [ ] **Step 2: Verify branch scope before publishing**
 
@@ -282,11 +293,14 @@ Run:
 ```powershell
 git status --short
 git log --oneline origin/main..HEAD
+git diff --check origin/main...HEAD
+git diff --name-status origin/main...HEAD
 git diff --stat origin/main...HEAD
+git diff origin/main...HEAD
 ```
 
 Expected: clean working tree and only the design spec, implementation plan, and root guide in the branch diff.
 
 - [ ] **Step 3: Push and open a draft pull request**
 
-Use the `github:yeet` workflow to push `docs/agents-clean-architecture-harness` and create a draft PR targeting `main`. The PR body must summarize the architecture contract, harness lifecycle, quality gates, known baseline debt, and exact verification results. Do not claim the existing production warnings or vulnerability were fixed.
+Push `docs/agents-clean-architecture-harness` with local Git, then use the connected GitHub MCP connector to create a draft PR targeting `main`; GitHub CLI is not required for this repository-authorized workflow. The PR body must summarize the architecture contract, harness lifecycle, quality gates, known baseline debt, and exact verification results. Do not claim the existing production warnings or vulnerability were fixed.
