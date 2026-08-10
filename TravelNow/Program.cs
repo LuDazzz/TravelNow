@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using TravelNow.Application;
 using TravelNow.Extensions;
 using TravelNow.Infrastructure;
@@ -13,6 +14,13 @@ builder.Services.AddInfrastructureDI(builder.Configuration);
 
 var app = builder.Build();
 
+// Auto-run EF migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<TravelNowDbContext>();
+    dbContext.Database.Migrate();
+}
+
 using (var scope = app.Services.CreateScope())
 {
     scope.ServiceProvider.SeedRolesAsync().GetAwaiter().GetResult();
@@ -27,8 +35,6 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.UseSwaggerPage();
 }
 
