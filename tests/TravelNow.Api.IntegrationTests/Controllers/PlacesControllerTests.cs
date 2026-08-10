@@ -81,6 +81,21 @@ public sealed class PlacesControllerTests(WebApplicationFactory<Program> factory
         Assert.Contains("traceId", body, StringComparison.Ordinal);
     }
 
+    [Fact]
+    public async Task Swagger_ui_is_available_in_development()
+    {
+        using var client = factory.CreateClient(new WebApplicationFactoryClientOptions
+        {
+            BaseAddress = new Uri("https://localhost")
+        });
+
+        var response = await client.GetAsync("/swagger/index.html");
+        var body = await response.Content.ReadAsStringAsync();
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Contains("Swagger UI", body, StringComparison.OrdinalIgnoreCase);
+    }
+
     private sealed class StubPlaceReadPort(ListPlacesResult result) : IPlaceReadPort
     {
         public Task<ListPlacesResult> ListAsync(ListPlacesQuery query, CancellationToken cancellationToken)

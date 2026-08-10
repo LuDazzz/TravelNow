@@ -7,6 +7,9 @@
   <Project Path="TravelNow.Infrastructure/TravelNow.Infrastructure.csproj" />
   <Project Path="TravelNow.Shared/TravelNow.Shared.csproj" Id="fa0c5a79-2258-4fb1-ae32-1367e67693df" />
   <Project Path="TravelNow/TravelNow.csproj" />
+  <Project Path="TravelNow/docker-compose.dcproj">
+    <Build />
+  </Project>
   <Project Path="tests/TravelNow.Application.UnitTests/TravelNow.Application.UnitTests.csproj" />
   <Project Path="tests/TravelNow.Api.IntegrationTests/TravelNow.Api.IntegrationTests.csproj" />
 </Solution>
