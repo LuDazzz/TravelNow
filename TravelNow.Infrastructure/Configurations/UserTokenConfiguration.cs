@@ -14,5 +14,7 @@ public class UserTokenConfiguration : IEntityTypeConfiguration<UserToken>
         builder.Property(ut => ut.RefreshToken).HasMaxLength(500);
         builder.Property(ut => ut.DeviceInfo).HasMaxLength(500);
         builder.Property(ut => ut.LocationInfo).HasMaxLength(500);
+
+        builder.HasQueryFilter(ut => !ut.User.IsDeleted);
     }
 }

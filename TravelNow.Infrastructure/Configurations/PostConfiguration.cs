@@ -14,8 +14,8 @@ public class PostConfiguration : IEntityTypeConfiguration<Post>
 
         // Property configurations
         builder.Property(p => p.Title).HasMaxLength(500);
-        builder.Property(p => p.Content).HasColumnType("nvarchar(max)");
-        builder.Property(p => p.Rating).HasColumnType("float");
+        builder.Property(p => p.Content).HasColumnType("text");
+        builder.Property(p => p.Rating).HasColumnType("double precision");
 
         // Relationships
         builder.HasOne(p => p.Place)

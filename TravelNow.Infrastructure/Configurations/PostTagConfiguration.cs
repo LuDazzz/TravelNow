@@ -23,5 +23,7 @@ public class PostTagConfiguration : IEntityTypeConfiguration<PostTag>
             .WithMany(t => t.PostTags)
             .HasForeignKey(pt => pt.TagId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(pt => !pt.Post.IsDeleted && !pt.Tag.IsDeleted);
     }
 }

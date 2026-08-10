@@ -14,9 +14,13 @@ public static class DependencyInjection
     public static IServiceCollection AddInfrastructureDI(this IServiceCollection services, IConfiguration configuration)
     {
         // Database
-        var connectionString = configuration.GetConnectionString("DefaultConnection");
+        var connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException(
+                "Connection string 'DefaultConnection' was not found. Configure ConnectionStrings:DefaultConnection.");
+
         services.AddDbContext<TravelNowDbContext>(options =>
-            options.UseNpgsql(connectionString));
+            options.UseNpgsql(connectionString, npgsql =>
+                npgsql.MigrationsAssembly(typeof(TravelNowDbContext).Assembly.FullName)));
 
         // Identity
         services.AddIdentity<User, Role>(options =>

@@ -23,5 +23,7 @@ public class PlaceTagConfiguration : IEntityTypeConfiguration<PlaceTag>
             .WithMany(t => t.PlaceTags)
             .HasForeignKey(pt => pt.TagId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(pt => !pt.Place.IsDeleted && !pt.Tag.IsDeleted);
     }
 }
