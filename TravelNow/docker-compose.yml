@@ -1,15 +1,15 @@
 services:
   travelnow-api:
     build:
-      context: .
+      context: ..
       dockerfile: TravelNow/Dockerfile
     container_name: travelnow-api
     ports:
       - "8080:8080"
-      - "8081:8081"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=travelnow-db;Port=5432;Database=TravelNowDb;Username=postgres;Password=dung2309
+      - ASPNETCORE_HTTP_PORTS=8080
+      - ConnectionStrings__DefaultConnection=Host=travelnow-db;Port=5432;Database=TravelNowDb;Username=postgres;Password=${TRAVELNOW_DB_PASSWORD:?Set TRAVELNOW_DB_PASSWORD before starting Compose}
     depends_on:
       travelnow-db:
         condition: service_healthy
@@ -25,7 +25,7 @@ services:
     environment:
       - POSTGRES_DB=TravelNowDb
       - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=dung2309
+      - POSTGRES_PASSWORD=${TRAVELNOW_DB_PASSWORD:?Set TRAVELNOW_DB_PASSWORD before starting Compose}
     volumes:
       - travelnow-pgdata:/var/lib/postgresql/data
     healthcheck:

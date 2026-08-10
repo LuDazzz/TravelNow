@@ -23,5 +23,7 @@ public class UserInteractionConfiguration : IEntityTypeConfiguration<UserInterac
             .WithMany(p => p.UserInteractions)
             .HasForeignKey(ui => ui.PostId)
             .OnDelete(DeleteBehavior.Restrict);
+
+        builder.HasQueryFilter(ui => !ui.User.IsDeleted && !ui.Post.IsDeleted);
     }
 }

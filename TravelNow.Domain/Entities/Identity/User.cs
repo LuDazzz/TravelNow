@@ -20,7 +20,6 @@ public class User : IdentityUser<Guid>, IAuditEntity, IIsDeletedEntity
 
     public DateOnly? DateOfBirth { get; set; }
 
-    [MaxLength(20)]
     public GenderEnum Gender { get; set; }
 
     [MaxLength(500)]

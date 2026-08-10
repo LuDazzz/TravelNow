@@ -11,5 +11,7 @@ public class UserRoleConfiguration : IEntityTypeConfiguration<UserRole>
         builder.ToTable("UserRoles");
 
         builder.HasKey(ur => new { ur.UserId, ur.RoleId });
+
+        builder.HasQueryFilter(ur => !ur.User.IsDeleted);
     }
 }

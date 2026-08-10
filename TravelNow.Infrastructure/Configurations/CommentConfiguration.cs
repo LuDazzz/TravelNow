@@ -13,7 +13,7 @@ public class CommentConfiguration : IEntityTypeConfiguration<Comment>
         builder.HasKey(c => c.Id);
 
         // Property configurations
-        builder.Property(c => c.Content).IsRequired().HasColumnType("nvarchar(max)");
+        builder.Property(c => c.Content).IsRequired().HasColumnType("text");
 
         // Relationships
         builder.HasOne(c => c.User)

@@ -50,7 +50,7 @@ The design is grounded in the repository state observed on 2026-08-06:
 
 - SDK available locally: .NET SDK `10.0.300`.
 - `dotnet build TravelNow.slnx --nologo` succeeds after package restore.
-- The successful build emits 18 warnings.
+- A fresh `--no-restore` build emits 17 warnings. The initial restore build emitted 18 because the package vulnerability warning appeared during both restore and build evaluation.
 - The API dependency graph reports `NU1903` for a known high-severity vulnerability in transitive package `Microsoft.OpenApi` 2.0.0.
 - Domain entities emit multiple `CS8618` nullable initialization warnings.
 - No test project is present in the solution.
@@ -87,7 +87,7 @@ Transaction boundaries belong to the use case. A transaction abstraction may exp
 
 ### Infrastructure
 
-Infrastructure owns EF Core, PostgreSQL, ASP.NET Identity persistence, repository and port implementations, migrations, caches, files, email, queues, and third-party clients. EF mappings belong in `IEntityTypeConfiguration<T>` classes. Infrastructure may translate provider failures into stable Application/Domain failures but must not leak provider exceptions across its boundary.
+Infrastructure owns EF Core, PostgreSQL, ASP.NET Identity persistence, repository and port implementations, migrations, caches, files, email, queues, and third-party clients. EF mappings belong in `IEntityTypeConfiguration<T>` classes. Infrastructure must keep provider types and provider-specific failures out of port signatures, Application/Domain results, and client responses. It may translate expected provider failures into stable Application/Domain failures. Unexpected provider exceptions may bubble unchanged to the global exception boundary so their original diagnostic context can be logged once; they must never be returned to clients.
 
 Audit population and soft-delete implementation remain centralized infrastructure concerns and require integration coverage.
 

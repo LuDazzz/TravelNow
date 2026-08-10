@@ -16,7 +16,6 @@ public class UserConfiguration : IEntityTypeConfiguration<User>
         builder.Property(u => u.FirstName).HasMaxLength(100);
         builder.Property(u => u.LastName).HasMaxLength(100);
         builder.Property(u => u.AvatarUrl).HasMaxLength(500);
-        builder.Property(u => u.Gender).HasMaxLength(20);
         builder.Property(u => u.Address).HasMaxLength(500);
         builder.Property(u => u.Email).HasMaxLength(256);
         builder.Property(u => u.UserName).HasMaxLength(256);
