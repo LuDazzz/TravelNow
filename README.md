@@ -17,8 +17,7 @@ The repository currently contains the backend foundation for that product: an AS
 - [Technology stack](#technology-stack)
 - [Prerequisites](#prerequisites)
 - [Configuration](#configuration)
-- [Run the project with Docker Compose](#run-the-project-with-docker-compose)
-- [Run the API locally with PostgreSQL in Docker](#run-the-api-locally-with-postgresql-in-docker)
+- [Run the project](#run-the-project)
 - [Run from Visual Studio](#run-from-visual-studio)
 - [Connect with pgAdmin](#connect-with-pgadmin)
 - [API reference](#api-reference)
@@ -389,280 +388,95 @@ Important: Docker Compose reads `TravelNow/.env`, but `dotnet ef` does not autom
 
 Never commit real passwords to `appsettings.json`, `.env.example`, or source code. Use `.env`, .NET User Secrets, environment variables, or a deployment secret manager.
 
-## Run the project with Docker Compose
+## Run the project
 
-This workflow runs PostgreSQL and the API in Docker. EF migrations are applied from the host before the API is considered ready.
+The shortest working path is Docker Compose for PostgreSQL plus the API. Run these commands from the repository root.
 
-All commands assume the terminal is opened at the repository root:
-
-```text
-D:\TravelNow\TravelNow
-```
-
-### Step 1: create the local Compose environment file
-
-PowerShell:
+### 1. Configure the database password
 
 ```powershell
 Copy-Item .\TravelNow\.env.example .\TravelNow\.env
 notepad .\TravelNow\.env
 ```
 
-Bash:
-
-```bash
-cp ./TravelNow/.env.example ./TravelNow/.env
-```
-
-Replace the placeholder:
+Set a local password in `TravelNow/.env`:
 
 ```env
 TRAVELNOW_DB_PASSWORD=your-local-password
 ```
 
-The `.env` file is ignored by Git.
+The `.env` file is ignored by Git and must not be committed.
 
-### Step 2: start PostgreSQL first
-
-```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  up -d travelnow-db
-```
-
-Check its health:
+### 2. Start PostgreSQL
 
 ```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  ps
+docker compose --env-file .\TravelNow\.env -f .\TravelNow\docker-compose.yml up -d travelnow-db
 ```
 
-Expected database status:
+PostgreSQL is available from the host at `localhost:5433` with database `TravelNowDb` and user `postgres`.
 
-```text
-travelnow-db   Up ... (healthy)   0.0.0.0:5433->5432/tcp
-```
+### 3. Configure EF CLI and apply the schema
 
-### Step 3: configure the host connection string
-
-Use the same password that was placed in `TravelNow/.env`:
+`dotnet ef` does not automatically import the Compose `.env` file. Set the same password in the current terminal, then restore the local tool and apply migrations:
 
 ```powershell
 $dbPassword = "your-local-password"
 $env:ConnectionStrings__DefaultConnection = "Host=localhost;Port=5433;Database=TravelNowDb;Username=postgres;Password=$dbPassword"
-```
 
-Bash equivalent:
-
-```bash
-export ConnectionStrings__DefaultConnection="Host=localhost;Port=5433;Database=TravelNowDb;Username=postgres;Password=your-local-password"
-```
-
-This environment variable only exists in the current terminal session.
-
-### Step 4: restore the local EF tool
-
-```powershell
 dotnet tool restore
-```
-
-Verify the tool:
-
-```powershell
-dotnet ef --version
-```
-
-### Step 5: create/update the database schema
-
-```powershell
 dotnet ef database update `
   --project .\TravelNow.Infrastructure\TravelNow.Infrastructure.csproj `
   --startup-project .\TravelNow\TravelNow.csproj `
   --context TravelNowDbContext
 ```
 
-A successful first run applies the current migrations and creates the application tables plus `__EFMigrationsHistory`.
+Migrations create the schema but do not seed destination data.
 
-### Step 6: build and start the API container
-
-```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  up -d --build travelnow-api
-```
-
-Compose waits for the PostgreSQL health check before starting the API.
-
-### Step 7: verify the running services
+### 4. Build and start the API
 
 ```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  ps
+docker compose --env-file .\TravelNow\.env -f .\TravelNow\docker-compose.yml up -d --build travelnow-api
 ```
 
 Open:
 
-- API base URL: `http://localhost:8080`
-- Swagger UI: `http://localhost:8080/swagger/index.html`
-- PostgreSQL from the host: `localhost:5433`
+- API: `http://localhost:8080`
+- Swagger: `http://localhost:8080/swagger/index.html`
 
-Verify with PowerShell:
-
-```powershell
-Invoke-WebRequest http://localhost:8080/swagger/index.html -UseBasicParsing
-Invoke-RestMethod "http://localhost:8080/api/places?page=1&pageSize=20"
-```
-
-The place response is empty until data is inserted or seeded.
-
-### Step 8: view logs
+Check status or logs:
 
 ```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  logs -f travelnow-api
+docker compose --env-file .\TravelNow\.env -f .\TravelNow\docker-compose.yml ps
+docker compose --env-file .\TravelNow\.env -f .\TravelNow\docker-compose.yml logs -f travelnow-api
 ```
 
-Database logs:
+### Run the API locally instead of in Docker
+
+Keep `travelnow-db` running, set `ConnectionStrings__DefaultConnection` as above, and run:
 
 ```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  logs -f travelnow-db
+dotnet run --project .\TravelNow\TravelNow.csproj --launch-profile http
 ```
 
-Press `Ctrl+C` to stop following logs. The containers continue running.
+Local URLs are `http://localhost:5252` and `http://localhost:5252/swagger/index.html`.
 
-### Step 9: stop the project
+### Visual Studio
 
-Stop containers while preserving PostgreSQL data:
-
-```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  down
-```
-
-To start again, run the Compose `up -d` command. Existing database data remains in the named volume.
-
-### Reset the local database
-
-Warning: this removes the local PostgreSQL volume and all data inside it.
-
-```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  down -v
-```
-
-After resetting, start PostgreSQL and run `dotnet ef database update` again.
-
-## Run the API locally with PostgreSQL in Docker
-
-This workflow is useful for debugging the .NET process while keeping PostgreSQL containerized.
-
-### Step 1: start PostgreSQL
-
-```powershell
-docker compose `
-  --env-file .\TravelNow\.env `
-  -f .\TravelNow\docker-compose.yml `
-  up -d travelnow-db
-```
-
-### Step 2: set the local API connection string
-
-```powershell
-$dbPassword = "your-local-password"
-$env:ConnectionStrings__DefaultConnection = "Host=localhost;Port=5433;Database=TravelNowDb;Username=postgres;Password=$dbPassword"
-```
-
-The host port is `5433`. Do not use the Compose service name `travelnow-db` from a process running directly on Windows.
-
-### Step 3: apply migrations
-
-```powershell
-dotnet tool restore
-
-dotnet ef database update `
-  --project .\TravelNow.Infrastructure\TravelNow.Infrastructure.csproj `
-  --startup-project .\TravelNow\TravelNow.csproj `
-  --context TravelNowDbContext
-```
-
-### Step 4: run the API
-
-```powershell
-dotnet run `
-  --project .\TravelNow\TravelNow.csproj `
-  --launch-profile http
-```
-
-Local URLs:
-
-- API base URL: `http://localhost:5252`
-- Swagger UI: `http://localhost:5252/swagger/index.html`
-
-The HTTPS launch profile is also available:
-
-```powershell
-dotnet run `
-  --project .\TravelNow\TravelNow.csproj `
-  --launch-profile https
-```
-
-HTTPS URLs:
-
-- `https://localhost:7183`
-- `http://localhost:5252`
-
-If the local development certificate is not trusted, run:
-
-```powershell
-dotnet dev-certs https --trust
-```
-
-## Run from Visual Studio
-
-### Local API debugging
-
-1. Open `TravelNow.slnx`.
-2. Ensure Docker PostgreSQL is running on port `5433`.
-3. Set `ConnectionStrings__DefaultConnection` through the launch environment, User Secrets, or a safe local configuration source.
-4. Set the `TravelNow` project as the startup project.
-5. Select the `http` or `https` profile.
-6. Build the solution.
-7. Press `F5`.
-
-Swagger opens automatically for the standard launch profiles.
-
-### Docker Compose debugging
-
-1. Create `TravelNow/.env` and set `TRAVELNOW_DB_PASSWORD`.
-2. Restore/build the solution once.
-3. Set the Docker Compose project as the startup project.
-4. Start debugging.
-
-Visual Studio can generate a debug override that runs a helper process before attaching the application. If port `8080` returns an empty response and `docker top travelnow-api` shows only `DistrolessHelper --wait`, stop the Visual Studio debug session and recreate the services with the normal Compose command.
-
-If Visual Studio reports that `TravelNow.dll` is missing, run:
+Open `TravelNow.slnx`, choose `TravelNow` for local API debugging or `docker-compose` to run both services. If Visual Studio reports a missing `TravelNow.dll`, rebuild the Debug project first:
 
 ```powershell
 dotnet build .\TravelNow\TravelNow.csproj --configuration Debug
 ```
 
-Then rebuild the Docker Compose project.
+### Stop or reset
 
+Stop services while keeping database data:
+
+```powershell
+docker compose --env-file .\TravelNow\.env -f .\TravelNow\docker-compose.yml down
+```
+
+To delete the local database volume and recreate an empty database, use `down -v`. This is destructive for local data.
 ## Connect with pgAdmin
 
 For pgAdmin installed directly on the host:
@@ -913,49 +727,26 @@ dotnet ef migrations has-pending-model-changes `
 
 ## Repository structure
 
-```text
-TravelNow/
-|-- .config/
-|   `-- dotnet-tools.json
-|-- tests/
-|   |-- TravelNow.Application.UnitTests/
-|   `-- TravelNow.Api.IntegrationTests/
-|-- TravelNow/
-|   |-- Controllers/
-|   |-- Extensions/
-|   |-- Middlewares/
-|   |-- Models/
-|   |-- Properties/
-|   |-- Dockerfile
-|   |-- docker-compose.dcproj
-|   |-- docker-compose.yml
-|   |-- Program.cs
-|   `-- TravelNow.csproj
-|-- TravelNow.Application/
-|   |-- Abstractions/
-|   |-- Dtos/
-|   |-- Features/
-|   |-- Interfaces/
-|   `-- DependencyInjection.cs
-|-- TravelNow.Domain/
-|   |-- Constants/
-|   |-- Entities/
-|   |-- Enums/
-|   `-- Exceptions/
-|-- TravelNow.Infrastructure/
-|   |-- Configurations/
-|   |-- Features/
-|   |-- Migrations/
-|   |-- Repositories/
-|   |-- UnitOfWorks/
-|   |-- DependencyInjection.cs
-|   |-- TravelNowDbContext.cs
-|   `-- TravelNowDbContextFactory.cs
-|-- TravelNow.Shared/
-|-- TravelNow.slnx
-`-- README.md
-```
+| Project | Responsibility |
+| --- | --- |
+| `TravelNow` | ASP.NET Core API, controllers, middleware, Swagger, and startup configuration |
+| `TravelNow.Application` | Use cases, handlers, DTOs, and persistence abstractions |
+| `TravelNow.Domain` | Entities, enums, exceptions, audit, and soft-delete contracts |
+| `TravelNow.Infrastructure` | EF Core, PostgreSQL, Identity, repositories, configurations, and migrations |
+| `TravelNow.Shared` | Shared helpers |
+| `tests/*` | Application unit tests and API integration tests |
 
+Important runtime files:
+
+```text
+TravelNow/docker-compose.yml                  Docker services
+TravelNow/Dockerfile                          API image
+TravelNow/Program.cs                          Application startup
+TravelNow.Infrastructure/TravelNowDbContext.cs EF Core context
+TravelNow.Infrastructure/Migrations/           Database migrations
+TravelNow.Infrastructure/TravelNowDbContextFactory.cs EF design-time setup
+.config/dotnet-tools.json                     Local dotnet-ef version
+```
 ## Development workflow
 
 ### Adding an API feature
