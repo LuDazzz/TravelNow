@@ -23,6 +23,8 @@ public class TravelNowDbContext : IdentityDbContext<User, Role, Guid, UserClaim,
     public DbSet<ProvinceMedia> ProvinceMedias { get; set; }
     public DbSet<Comment> Comments { get; set; }
     public DbSet<UserInteraction> UserInteractions { get; set; }
+    public DbSet<RefreshTokenEntity> RefreshTokens { get; set; }
+    public DbSet<OtpRequest> OtpRequests { get; set; }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

@@ -1,6 +1,7 @@
 using System.Security;
 using Microsoft.AspNetCore.Mvc;
 using TravelNow.Domain.Exceptions;
+using TravelNow.Infrastructure.Features.Auth;
 
 namespace TravelNow.Middlewares;
 
@@ -21,13 +22,14 @@ public sealed class ExceptionHandlingMiddleware(
     }
 
     private async Task HandleExceptionAsync(HttpContext context, Exception exception)
-    {
-        var statusCode = exception switch
+{
+            var statusCode = exception switch
         {
             NotFoundException => StatusCodes.Status404NotFound,
             BadRequestException => StatusCodes.Status400BadRequest,
             UnauthorizedAccessException => StatusCodes.Status401Unauthorized,
             SecurityException => StatusCodes.Status403Forbidden,
+            TravelNow.Infrastructure.Features.Auth.SecurityTokensInvalidException => StatusCodes.Status401Unauthorized,
             _ => StatusCodes.Status500InternalServerError
         };
 

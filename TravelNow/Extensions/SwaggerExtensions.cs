@@ -1,5 +1,3 @@
-using Microsoft.OpenApi;
-
 namespace TravelNow.Extensions;
 
 public static class SwaggerExtensions
@@ -11,10 +9,20 @@ public static class SwaggerExtensions
     {
         services.AddSwaggerGen(options =>
         {
-            options.SwaggerDoc(apiVersion, new OpenApiInfo
+            options.SwaggerDoc(apiVersion, new Microsoft.OpenApi.OpenApiInfo
             {
                 Title = apiTitle,
                 Version = apiVersion
+            });
+
+            options.AddSecurityDefinition("Bearer", new Microsoft.OpenApi.OpenApiSecurityScheme
+            {
+                Name = "Authorization",
+                Type = Microsoft.OpenApi.SecuritySchemeType.Http,
+                Scheme = "bearer",
+                BearerFormat = "JWT",
+                In = Microsoft.OpenApi.ParameterLocation.Header,
+                Description = "Enter 'Bearer' [space] and your JWT token"
             });
         });
 

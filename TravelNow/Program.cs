@@ -5,18 +5,19 @@ using TravelNow.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllers();
 builder.Services.AddSwaggerPage();
 
-// Register Application & Infrastructure DI
 builder.Services.AddApplicationDI();
 builder.Services.AddInfrastructureDI(builder.Configuration);
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-// Global exception handling middleware
+using (var scope = app.Services.CreateScope())
+{
+    scope.ServiceProvider.SeedRolesAsync().GetAwaiter().GetResult();
+}
+
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 
 app.UseHttpsRedirection();
@@ -26,6 +27,8 @@ app.UseAuthorization();
 
 if (app.Environment.IsDevelopment())
 {
+    app.UseSwagger();
+    app.UseSwaggerUI();
     app.UseSwaggerPage();
 }
 
