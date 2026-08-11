@@ -13,11 +13,11 @@ public class Post : BaseEntity
 
     public Guid PlaceId { get; set; }
 
-    public virtual Place Place { get; set; }
+    public required virtual Place Place { get; set; }
 
     public Guid UserId { get; set; }
 
-    public virtual User User { get; set; }
+    public required virtual User User { get; set; }
 
     public string? Content { get; set; }
 

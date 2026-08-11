@@ -14,7 +14,6 @@ builder.Services.AddInfrastructureDI(builder.Configuration);
 
 var app = builder.Build();
 
-// Auto-run EF migrations on startup
 using (var scope = app.Services.CreateScope())
 {
     var dbContext = scope.ServiceProvider.GetRequiredService<TravelNowDbContext>();
@@ -33,10 +32,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("EnableSwagger"))
+if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.UseSwaggerPage();
 }
 

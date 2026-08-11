@@ -9,11 +9,11 @@ public class UserInteraction : IAuditEntity
 {
     public Guid UserId { get; set; }
 
-    public virtual User User { get; set; }
+    public required virtual User User { get; set; }
 
     public Guid PostId { get; set; }
 
-    public virtual Post Post { get; set; }
+    public required virtual Post Post { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 

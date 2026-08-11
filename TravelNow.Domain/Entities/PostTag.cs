@@ -8,11 +8,11 @@ public class PostTag : IAuditEntity
 {
     public Guid PostId { get; set; }
 
-    public virtual Post Post { get; set; }
+    public required virtual Post Post { get; set; }
 
     public Guid TagId { get; set; }
 
-    public virtual Tag Tag { get; set; }
+    public required virtual Tag Tag { get; set; }
 
     public DateTimeOffset CreatedAt { get; set; }
 

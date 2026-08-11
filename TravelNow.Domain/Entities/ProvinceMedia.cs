@@ -10,5 +10,5 @@ public class ProvinceMedia : BaseEntity
 
     public Guid ProvinceId { get; set; }
 
-    public virtual Province Province { get; set; }
+    public required virtual Province Province { get; set; }
 }
