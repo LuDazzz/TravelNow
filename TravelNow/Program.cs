@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using TravelNow.Application;
 using TravelNow.Extensions;
 using TravelNow.Infrastructure;
@@ -14,16 +15,31 @@ builder.Services.AddInfrastructureDI(builder.Configuration);
 
 var app = builder.Build();
 
-// Auto-run EF migrations on startup
 using (var scope = app.Services.CreateScope())
 {
-    var dbContext = scope.ServiceProvider.GetRequiredService<TravelNowDbContext>();
-    dbContext.Database.Migrate();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var dbContext = scope.ServiceProvider.GetRequiredService<TravelNowDbContext>();
+        dbContext.Database.Migrate();
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Migration failed. App starting without migrations.");
+    }
 }
 
 using (var scope = app.Services.CreateScope())
 {
-    scope.ServiceProvider.SeedRolesAsync().GetAwaiter().GetResult();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        await scope.ServiceProvider.SeedRolesAsync();
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Role seeding failed. App starting without seeded roles.");
+    }
 }
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
@@ -33,10 +49,8 @@ app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 
-if (app.Environment.IsDevelopment() || builder.Configuration.GetValue<bool>("EnableSwagger"))
+if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
     app.UseSwaggerPage();
 }
 

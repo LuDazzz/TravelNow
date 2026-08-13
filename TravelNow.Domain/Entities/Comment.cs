@@ -9,11 +9,11 @@ public class Comment : BaseEntity
 {
     public Guid UserId { get; set; }
 
-    public virtual User User { get; set; }
+    public required virtual User User { get; set; }
 
     public Guid PostId { get; set; }
 
-    public virtual Post Post { get; set; }
+    public required virtual Post Post { get; set; }
 
     public Guid? ParentId { get; set; }
 
@@ -21,5 +21,5 @@ public class Comment : BaseEntity
 
     public virtual ICollection<Comment> Replies { get; set; } = [];
 
-    public string Content { get; set; }
+    public required string Content { get; set; }
 }

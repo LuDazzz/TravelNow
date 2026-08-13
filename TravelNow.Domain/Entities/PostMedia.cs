@@ -10,5 +10,5 @@ public class PostMedia : BaseEntity
 
     public Guid PostId { get; set; }
 
-    public virtual Post Post { get; set; }
+    public required virtual Post Post { get; set; }
 }
