@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using TravelNow.Application.Features.Auth.ChangePassword;
 using TravelNow.Application.Features.Auth.ForgotPassword;
 using TravelNow.Application.Features.Auth.Login;
+using TravelNow.Application.Features.Auth.Logout;
 using TravelNow.Application.Features.Auth.RefreshToken;
 using TravelNow.Application.Features.Auth.Register;
 using TravelNow.Application.Features.Auth.ResetPassword;
@@ -20,7 +21,8 @@ public sealed class AuthController(
     ForgotPasswordHandler forgotPasswordHandler,
     VerifyOtpHandler verifyOtpHandler,
     ResetPasswordHandler resetPasswordHandler,
-    ChangePasswordHandler changePasswordHandler) : ControllerBase
+    ChangePasswordHandler changePasswordHandler,
+    LogoutHandler logoutHandler) : ControllerBase
 {
     [HttpPost("register")]
     [ProducesResponseType(typeof(RegisterResponse), StatusCodes.Status200OK)]
@@ -76,6 +78,7 @@ public sealed class AuthController(
     [HttpPost("refresh-token")]
     [ProducesResponseType(typeof(RefreshTokenResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<RefreshTokenResponse>> RefreshToken(
         [FromBody] RefreshTokenRequest request,
         CancellationToken cancellationToken)
@@ -167,5 +170,16 @@ public sealed class AuthController(
         await changePasswordHandler.HandleAsync(command, cancellationToken);
 
         return Ok(new { message = "Password changed successfully" });
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> Logout(CancellationToken cancellationToken)
+    {
+        await logoutHandler.HandleAsync(cancellationToken);
+
+        return Ok(new { message = "Logged out successfully" });
     }
 }

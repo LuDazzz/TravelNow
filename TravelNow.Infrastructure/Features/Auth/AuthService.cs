@@ -42,7 +42,7 @@ public sealed class AuthService(
 
         var accessToken = jwtTokenService.GenerateAccessToken(user, roles);
         var refreshToken = jwtTokenService.GenerateRefreshToken();
-        var tokenExp = DateTimeOffset.UtcNow.AddDays(7);
+        var tokenExp = jwtTokenService.GetRefreshTokenExpiry();
 
         var existing = await dbContext.RefreshTokens
             .FirstOrDefaultAsync(t => t.UserId == user.Id && !t.IsRevoked, cancellationToken);
@@ -103,6 +103,16 @@ public sealed class AuthService(
         var accessToken = jwtTokenService.GenerateAccessToken(user, roles);
         var refreshToken = jwtTokenService.GenerateRefreshToken();
 
+        var token = new RefreshTokenEntity
+        {
+            UserId = user.Id,
+            Token = refreshToken,
+            Expires = jwtTokenService.GetRefreshTokenExpiry(),
+            DeviceInfo = "Session"
+        };
+        await dbContext.RefreshTokens.AddAsync(token, cancellationToken);
+        await dbContext.SaveChangesAsync(cancellationToken);
+
         return new RegisterResult(
             user.Id,
             user.Email!,
@@ -124,6 +134,7 @@ public sealed class AuthService(
             throw new BadRequestException("Invalid or expired refresh token");
 
         storedToken.IsUsed = true;
+        storedToken.IsRevoked = true;
         await dbContext.SaveChangesAsync(cancellationToken);
 
         var user = await userManager.FindByIdAsync(userId.ToString());
@@ -138,7 +149,7 @@ public sealed class AuthService(
         {
             UserId = user.Id,
             Token = newRefreshToken,
-            Expires = DateTimeOffset.UtcNow.AddDays(7),
+            Expires = jwtTokenService.GetRefreshTokenExpiry(),
             DeviceInfo = storedToken.DeviceInfo
         };
         await dbContext.RefreshTokens.AddAsync(newToken, cancellationToken);
