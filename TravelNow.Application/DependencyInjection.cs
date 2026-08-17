@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using TravelNow.Application.Features.Auth.ChangePassword;
 using TravelNow.Application.Features.Auth.ForgotPassword;
 using TravelNow.Application.Features.Auth.Login;
+using TravelNow.Application.Features.Auth.Logout;
 using TravelNow.Application.Features.Auth.RefreshToken;
 using TravelNow.Application.Features.Auth.Register;
 using TravelNow.Application.Features.Auth.ResetPassword;
@@ -22,6 +23,7 @@ public static class DependencyInjection
         services.AddScoped<VerifyOtpHandler>();
         services.AddScoped<ResetPasswordHandler>();
         services.AddScoped<ChangePasswordHandler>();
+        services.AddScoped<LogoutHandler>();
 
         return services;
     }

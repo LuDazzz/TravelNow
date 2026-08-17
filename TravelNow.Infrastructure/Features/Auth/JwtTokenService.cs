@@ -48,9 +48,9 @@ public sealed class JwtTokenService(IOptions<JwtSettings> jwtOptions) : IJwtToke
         return Convert.ToBase64String(randomNumber);
     }
 
-    public DateTime DecodeRefreshToken(string refreshToken)
+    public DateTimeOffset GetRefreshTokenExpiry()
     {
-        return DateTime.UtcNow.AddDays(_settings.RefreshTokenExpireDays);
+        return DateTimeOffset.UtcNow.AddDays(_settings.RefreshTokenExpireDays);
     }
 
     public ClaimsPrincipal GetPrincipalFromExpiredToken(string accessToken)

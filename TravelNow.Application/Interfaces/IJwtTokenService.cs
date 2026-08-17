@@ -7,6 +7,6 @@ public interface IJwtTokenService
 {
     string GenerateAccessToken(User user, IList<string> roles);
     string GenerateRefreshToken();
-    DateTime DecodeRefreshToken(string refreshToken);
+    DateTimeOffset GetRefreshTokenExpiry();
     ClaimsPrincipal GetPrincipalFromExpiredToken(string accessToken);
 }
